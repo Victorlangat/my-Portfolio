@@ -27,7 +27,7 @@ const Header = () => {
       <div className="container">
         <nav className="nav">
           <a href="#home" className="logo">
-            Your<span>Name</span>
+            Victor<span>James</span>
           </a>
           
           <div 

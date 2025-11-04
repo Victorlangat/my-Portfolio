@@ -1,0 +1,289 @@
+.admin-dashboard {
+    min-height: 100vh;
+    background: var(--dark-bg);
+    color: var(--dark-text);
+    padding: 100px 0;
+  }
+  
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 50px;
+    gap: 20px;
+  }
+  
+  .admin-header h1 {
+    margin: 0;
+    color: var(--primary);
+  }
+  
+  .admin-subtitle {
+    color: var(--gray-text);
+    margin: 5px 0 0 0;
+  }
+  
+  .admin-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .projects-header p {
+    color: var(--gray-text);
+    margin: -10px 0 20px 0;
+    font-size: 0.9rem;
+  }
+  
+  /* Rest of the CSS remains the same as previous version */
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px;
+  }
+  
+  .admin-header h1 {
+    margin: 0;
+    color: var(--primary);
+  }
+  
+  .project-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  
+  .project-form {
+    background: var(--dark-card);
+    padding: 30px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .form-header h2 {
+    margin: 0;
+    color: var(--primary);
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--gray-text);
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .close-btn:hover {
+    color: var(--dark-text);
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--dark-text);
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--dark-bg);
+    border: 1px solid #334155;
+    border-radius: 5px;
+    color: var(--dark-text);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+  
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+  
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+  
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+  
+  .btn-outline:hover {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .projects-list h3 {
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+  
+  .no-projects {
+    text-align: center;
+    color: var(--gray-text);
+    font-style: italic;
+    padding: 40px;
+    background: var(--dark-card);
+    border-radius: 10px;
+  }
+  
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .project-card {
+    background: var(--dark-card);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+  
+  .project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .project-card-image {
+    height: 150px;
+    overflow: hidden;
+  }
+  
+  .project-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .project-card-content {
+    padding: 20px;
+  }
+  
+  .project-card-content h4 {
+    margin: 0 0 10px 0;
+    color: var(--dark-text);
+  }
+  
+  .project-card-content p {
+    color: var(--gray-text);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .project-card-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-edit,
+  .btn-delete {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+  
+  .btn-edit {
+    background: var(--primary);
+    color: white;
+  }
+  
+  .btn-edit:hover {
+    background: var(--primary-dark);
+  }
+  
+  .btn-delete {
+    background: #dc2626;
+    color: white;
+  }
+  
+  .btn-delete:hover {
+    background: #b91c1c;
+  }
+  
+  @media (max-width: 768px) {
+    .admin-header {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+    }
+    
+    .admin-actions {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .project-form {
+      margin: 20px;
+      padding: 20px;
+    }
+    
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }

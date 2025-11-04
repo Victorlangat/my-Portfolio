@@ -3,27 +3,27 @@ import './footer.css';
 
 const Footer = () => {
   return (
-    <footer className="footer">
+    <footer className="footer dark-section">
       <div className="container">
         <div className="footer-content">
-          <div className="logo">Your<span>Name</span></div>
+          <div className="logo">Victor<span>James</span></div>
           <div className="social-links">
-            <a href="https://github.com/yourusername" className="social-link" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/Victorlangat" className="social-link" target="_blank" rel="noopener noreferrer">
               GitHub
             </a>
-            <a href="https://linkedin.com/in/yourusername" className="social-link" target="_blank" rel="noopener noreferrer">
+            <a href="https://linkedin.com/in/victor-james-44b717249" className="social-link" target="_blank" rel="noopener noreferrer">
               LinkedIn
             </a>
             <a href="https://twitter.com/yourusername" className="social-link" target="_blank" rel="noopener noreferrer">
               Twitter
             </a>
-            <a href="https://dribbble.com/yourusername" className="social-link" target="_blank" rel="noopener noreferrer">
-              Dribbble
+            <a href="/admin" className="social-link admin-link">
+              Admin
             </a>
           </div>
         </div>
         <div className="copyright">
-          <p>&copy; 2023 Your Name. All Rights Reserved.</p>
+          <p>&copy; 2023 Victor James Langat. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
