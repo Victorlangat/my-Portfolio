@@ -6,6 +6,7 @@ const AdminDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -17,17 +18,34 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is authenticated
     const isAuthenticated = localStorage.getItem('adminAuthenticated');
     if (!isAuthenticated) {
       navigate('/admin');
       return;
     }
-
-    // Load projects
-    const savedProjects = JSON.parse(localStorage.getItem('portfolioProjects')) || [];
-    setProjects(savedProjects);
+    fetchProjects();
   }, [navigate]);
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/projects');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setProjects(data.projects);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      // Fallback to localStorage
+      const localProjects = JSON.parse(localStorage.getItem('portfolioProjects')) || [];
+      setProjects(localProjects);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -36,26 +54,60 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const newProject = {
-      id: editingProject ? editingProject.id : Date.now(),
-      ...formData
-    };
+    setLoading(true);
 
-    let updatedProjects;
-    if (editingProject) {
-      updatedProjects = projects.map(project =>
-        project.id === editingProject.id ? newProject : project
-      );
-    } else {
-      updatedProjects = [...projects, newProject];
+    try {
+      const url = editingProject 
+        ? `http://localhost:5000/api/projects/${editingProject.id}`
+        : 'http://localhost:5000/api/projects';
+      
+      const method = editingProject ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        await fetchProjects(); // Refresh the projects list
+        resetForm();
+        alert(editingProject ? 'Project updated successfully!' : 'Project added successfully!');
+      } else {
+        alert(result.error || 'Failed to save project');
+      }
+    } catch (error) {
+      console.error('Error saving project:', error);
+      alert('Failed to save project. Please try again.');
+      
+      // Fallback to localStorage
+      const newProject = {
+        id: editingProject ? editingProject.id : Date.now().toString(),
+        ...formData
+      };
+
+      let updatedProjects;
+      if (editingProject) {
+        updatedProjects = projects.map(project =>
+          project.id === editingProject.id ? newProject : project
+        );
+      } else {
+        updatedProjects = [...projects, newProject];
+      }
+
+      setProjects(updatedProjects);
+      localStorage.setItem('portfolioProjects', JSON.stringify(updatedProjects));
+      resetForm();
+      alert('Project saved locally (backend unavailable)');
+    } finally {
+      setLoading(false);
     }
-
-    setProjects(updatedProjects);
-    localStorage.setItem('portfolioProjects', JSON.stringify(updatedProjects));
-    resetForm();
   };
 
   const resetForm = () => {
@@ -77,17 +129,38 @@ const AdminDashboard = () => {
     setShowForm(true);
   };
 
-  const deleteProject = (projectId) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
+  const deleteProject = async (projectId) => {
+    if (!window.confirm('Are you sure you want to delete this project?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/projects/${projectId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        await fetchProjects(); // Refresh the projects list
+        alert('Project deleted successfully!');
+      } else {
+        alert(result.error || 'Failed to delete project');
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      
+      // Fallback to localStorage
       const updatedProjects = projects.filter(project => project.id !== projectId);
       setProjects(updatedProjects);
       localStorage.setItem('portfolioProjects', JSON.stringify(updatedProjects));
+      alert('Project deleted locally (backend unavailable)');
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('adminAuthenticated');
-    navigate('/admin');
+    navigate('/'); // Redirect to homepage
   };
 
   return (
@@ -102,12 +175,14 @@ const AdminDashboard = () => {
             <button 
               className="btn btn-primary"
               onClick={() => setShowForm(true)}
+              disabled={loading}
             >
               Add New Project
             </button>
             <button 
               className="btn btn-outline"
               onClick={handleLogout}
+              disabled={loading}
             >
               Logout
             </button>
@@ -119,7 +194,7 @@ const AdminDashboard = () => {
             <div className="project-form">
               <div className="form-header">
                 <h2>{editingProject ? 'Edit Project' : 'Add New Project'}</h2>
-                <button className="close-btn" onClick={resetForm}>×</button>
+                <button className="close-btn" onClick={resetForm} disabled={loading}>×</button>
               </div>
               
               <form onSubmit={handleSubmit}>
@@ -131,6 +206,7 @@ const AdminDashboard = () => {
                     value={formData.title}
                     onChange={handleInputChange}
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -142,6 +218,7 @@ const AdminDashboard = () => {
                     onChange={handleInputChange}
                     rows="4"
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -154,6 +231,7 @@ const AdminDashboard = () => {
                     onChange={handleInputChange}
                     placeholder="https://example.com/image.jpg"
                     required
+                    disabled={loading}
                   />
                 </div>
 
@@ -165,6 +243,7 @@ const AdminDashboard = () => {
                     value={formData.liveLink}
                     onChange={handleInputChange}
                     placeholder="https://your-project.com"
+                    disabled={loading}
                   />
                 </div>
 
@@ -176,6 +255,7 @@ const AdminDashboard = () => {
                     value={formData.githubLink}
                     onChange={handleInputChange}
                     placeholder="https://github.com/yourusername/project"
+                    disabled={loading}
                   />
                 </div>
 
@@ -187,15 +267,16 @@ const AdminDashboard = () => {
                     value={formData.caseStudy}
                     onChange={handleInputChange}
                     placeholder="https://your-blog.com/case-study"
+                    disabled={loading}
                   />
                 </div>
 
                 <div className="form-actions">
-                  <button type="button" className="btn btn-outline" onClick={resetForm}>
+                  <button type="button" className="btn btn-outline" onClick={resetForm} disabled={loading}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingProject ? 'Update Project' : 'Add Project'}
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? 'Saving...' : (editingProject ? 'Update Project' : 'Add Project')}
                   </button>
                 </div>
               </form>
@@ -208,7 +289,12 @@ const AdminDashboard = () => {
             <h3>Current Projects ({projects.length})</h3>
             <p>Projects will appear on your main portfolio page</p>
           </div>
-          {projects.length === 0 ? (
+          
+          {loading && projects.length === 0 ? (
+            <div className="loading">
+              <p>Loading projects...</p>
+            </div>
+          ) : projects.length === 0 ? (
             <div className="no-projects">
               <p>No projects added yet. Click "Add New Project" to get started!</p>
             </div>
@@ -226,12 +312,14 @@ const AdminDashboard = () => {
                       <button 
                         className="btn-edit"
                         onClick={() => editProject(project)}
+                        disabled={loading}
                       >
                         Edit
                       </button>
                       <button 
                         className="btn-delete"
                         onClick={() => deleteProject(project.id)}
+                        disabled={loading}
                       >
                         Delete
                       </button>
