@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1762326584390",
+    "title": "Linnka Mortors  website",
+    "description": "An e-commerce website , where the car company can sell and advertise their cars online and get real market data on customer preferences and market trends",
+    "image": "https://images.unsplash.com/photo-1526726538690-5cbf956ae2fd?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGNhcnN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600",
+    "liveLink": "https://cars-ebon-six.vercel.app/",
+    "githubLink": "https://github.com/Victorlangat/cars",
+    "caseStudy": "",
+    "createdAt": "2025-11-05T07:09:44.390Z"
+  },
+  {
+    "id": "1762326724274",
+    "title": "Local Art",
+    "description": "An original idea of a website where an artis can post their art and users can get to purchase local art from local artists.\nthis website promotes local craft and also makes art accessible to people and the users can connect with their artist directly",
+    "image": "https://images.unsplash.com/photo-1571143322760-3cd3ed1ea3d7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGZ1biUyMGFydHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600",
+    "liveLink": "https://local-art-z61r.vercel.app/",
+    "githubLink": "https://github.com/Victorlangat/local-art",
+    "caseStudy": "",
+    "createdAt": "2025-11-05T07:12:04.274Z"
+  }
+]

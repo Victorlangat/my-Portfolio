@@ -2,21 +2,54 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
-// Constants
-const PORT = process.env.PORT || 5000;
-const NODE_ENV = process.env.NODE_ENV || 'development';
-
-// Initialize Express app
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Email Configuration
+// Projects data file
+const projectsFile = path.join(__dirname, 'data', 'projects.json');
+
+// Ensure data directory exists
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir);
+}
+
+// Initialize projects file if it doesn't exist
+if (!fs.existsSync(projectsFile)) {
+  fs.writeFileSync(projectsFile, JSON.stringify([]));
+}
+
+// Helper functions for projects
+const readProjects = () => {
+  try {
+    const data = fs.readFileSync(projectsFile, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading projects:', error);
+    return [];
+  }
+};
+
+const writeProjects = (projects) => {
+  try {
+    fs.writeFileSync(projectsFile, JSON.stringify(projects, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Error writing projects:', error);
+    return false;
+  }
+};
+
+// Email configuration
 const createTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail',
@@ -73,7 +106,150 @@ const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-// Routes
+// Projects API Routes
+app.get('/api/projects', (req, res) => {
+  try {
+    const projects = readProjects();
+    res.json({
+      success: true,
+      projects: projects
+    });
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch projects'
+    });
+  }
+});
+
+app.post('/api/projects', (req, res) => {
+  try {
+    const { title, description, image, liveLink, githubLink, caseStudy } = req.body;
+    
+    if (!title || !description || !image) {
+      return res.status(400).json({
+        success: false,
+        error: 'Title, description, and image are required'
+      });
+    }
+
+    const projects = readProjects();
+    const newProject = {
+      id: Date.now().toString(),
+      title,
+      description,
+      image,
+      liveLink: liveLink || '',
+      githubLink: githubLink || '',
+      caseStudy: caseStudy || '',
+      createdAt: new Date().toISOString()
+    };
+
+    projects.push(newProject);
+    
+    if (writeProjects(projects)) {
+      res.status(201).json({
+        success: true,
+        project: newProject,
+        message: 'Project created successfully'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to save project'
+      });
+    }
+  } catch (error) {
+    console.error('Error creating project:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create project'
+    });
+  }
+});
+
+app.put('/api/projects/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, image, liveLink, githubLink, caseStudy } = req.body;
+    
+    const projects = readProjects();
+    const projectIndex = projects.findIndex(p => p.id === id);
+    
+    if (projectIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: 'Project not found'
+      });
+    }
+
+    projects[projectIndex] = {
+      ...projects[projectIndex],
+      title,
+      description,
+      image,
+      liveLink: liveLink || '',
+      githubLink: githubLink || '',
+      caseStudy: caseStudy || '',
+      updatedAt: new Date().toISOString()
+    };
+
+    if (writeProjects(projects)) {
+      res.json({
+        success: true,
+        project: projects[projectIndex],
+        message: 'Project updated successfully'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update project'
+      });
+    }
+  } catch (error) {
+    console.error('Error updating project:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update project'
+    });
+  }
+});
+
+app.delete('/api/projects/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const projects = readProjects();
+    const filteredProjects = projects.filter(p => p.id !== id);
+    
+    if (projects.length === filteredProjects.length) {
+      return res.status(404).json({
+        success: false,
+        error: 'Project not found'
+      });
+    }
+
+    if (writeProjects(filteredProjects)) {
+      res.json({
+        success: true,
+        message: 'Project deleted successfully'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to delete project'
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting project:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete project'
+    });
+  }
+});
+
+// Contact endpoint
 app.post('/api/contact', validateContactForm, async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
@@ -108,6 +284,7 @@ app.post('/api/contact', validateContactForm, async (req, res) => {
   }
 });
 
+// Test endpoints
 app.get('/api/email-test', async (req, res) => {
   try {
     await transporter.verify();
@@ -130,7 +307,7 @@ app.get('/api/health', (req, res) => {
     success: true,
     status: 'Server is healthy',
     timestamp: new Date().toISOString(),
-    environment: NODE_ENV,
+    environment: process.env.NODE_ENV || 'development',
     service: 'Portfolio Backend API'
   });
 });
@@ -154,28 +331,9 @@ app.use('*', (req, res) => {
 });
 
 // Start server
-const startServer = () => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running in ${NODE_ENV} mode on port ${PORT}`);
-    console.log(`📍 Health Check: http://localhost:${PORT}/api/health`);
-    console.log(`📧 Email Test: http://localhost:${PORT}/api/email-test`);
-    
-    if (NODE_ENV === 'development') {
-      console.log(`🔗 Contact Endpoint: http://localhost:${PORT}/api/contact`);
-    }
-  });
-};
-
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  process.exit(0);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📍 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`📧 Email Test: http://localhost:${PORT}/api/email-test`);
+  console.log(`📁 Projects API: http://localhost:${PORT}/api/projects`);
 });
-
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  process.exit(0);
-});
-
-// Initialize server
-startServer();
