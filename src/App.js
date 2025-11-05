@@ -14,7 +14,6 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-   
     const authStatus = localStorage.getItem('adminAuthenticated');
     setIsAuthenticated(!!authStatus);
   }, []);
